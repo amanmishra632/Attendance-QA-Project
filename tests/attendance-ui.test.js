@@ -63,3 +63,28 @@ test("Student can view attendance", async ({ request }) => {
     expect(data.student_id).toBe(102);
     expect(data.status).toBe("Present");
 });
+test("Teacher can change attendance from Present to Absent", async ({ page }) => {
+    await page.goto("http://localhost:3000");
+
+    await page.locator("#userRole").selectOption("teacher");
+    await page.locator("#studentId").fill("102");
+    await page.locator("#attendanceStatus").selectOption("Absent");
+
+    const responsePromise = page.waitForResponse(
+        response => response.url().includes("/attendance")
+    );
+
+    await page.locator("#saveAttendanceButton").click();
+
+    const response = await responsePromise;
+
+    expect(response.status()).toBe(200);
+
+    await expect(page.locator("#attendanceMessage"))
+        .toHaveText("Attendance saved successfully");
+      const record = db.prepare(
+    "SELECT * FROM attendance WHERE student_id = ?"
+    ).get(102);
+
+    expect(record.status).toBe("Absent");
+});
