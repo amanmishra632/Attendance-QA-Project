@@ -63,7 +63,16 @@ test("Student can view attendance", async ({ request }) => {
     expect(data.student_id).toBe(102);
     expect(data.status).toBe("Present");
 });
-test("Teacher can change attendance from Present to Absent", async ({ page }) => {
+test("Teacher can change attendance from Present to Absent", async ({ page,request }) => {
+     const setupResponse = await request.post("http://localhost:3000/attendance", {
+        data: {
+            role: "teacher",
+            student_id: 102,
+            status: "Present"
+        }
+    });
+
+    expect(setupResponse.status()).toBe(200);
     await page.goto("http://localhost:3000");
 
     await page.locator("#userRole").selectOption("teacher");
